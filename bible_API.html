@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible API Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --surface: #16171d;
+    --surface-alt: #1c1e26;
+    --border: #2a2c37;
+    --text: #e8e6e1;
+    --text-muted: #8a8892;
+    --accent: #c9a96e;
+    --accent-dim: rgba(201, 169, 110, 0.12);
+    --accent-glow: rgba(201, 169, 110, 0.25);
+    --danger: #d45d5d;
+    --success: #6dba82;
+    --radius: 10px;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -15%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(110, 130, 201, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  header h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.8rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    margin-bottom: 0.4rem;
+  }
+
+  header p {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover {
+    border-color: rgba(201, 169, 110, 0.2);
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .card-title .icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent-dim);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.45rem;
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  .input-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+  }
+
+  .input-hint a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.6rem;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #d4b478;
+    box-shadow: 0 4px 20px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+    animation: fadeSlide 0.3s ease;
+  }
+
+  .status-bar.visible { display: flex; }
+  .status-bar.error { background: rgba(212, 93, 93, 0.1); border: 1px solid rgba(212, 93, 93, 0.25); color: var(--danger); }
+  .status-bar.success { background: rgba(109, 186, 130, 0.1); border: 1px solid rgba(109, 186, 130, 0.25); color: var(--success); }
+  .status-bar.loading { background: var(--accent-dim); border: 1px solid rgba(201, 169, 110, 0.2); color: var(--accent); }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #results {
+    display: none;
+  }
+
+  #results.visible {
+    display: block;
+    animation: fadeSlide 0.4s ease;
+  }
+
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .results-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+  }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  @media (max-width: 500px) {
+    .book-grid { grid-template-columns: 1fr; }
+  }
+
+  .book-item {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .book-item:hover {
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .book-num {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .book-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .book-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .book-abbrev {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    display: none;
+    position: relative;
+  }
+
+  .code-block.visible { display: block; animation: fadeSlide 0.3s ease; }
+
+  .code-block .kw { color: var(--accent); }
+  .code-block .str { color: var(--success); }
+  .code-block .cmt { color: #555; font-style: italic; }
+
+  .toggle-code {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    padding: 0.3rem 0;
+    transition: color 0.2s;
+  }
+
+  .toggle-code:hover { color: var(--accent); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Bible API Explorer</h1>
+    <p>Powered by api.bible &middot; JavaScript Fetch</p>
+  </header>
+
+  <!-- API Key Input -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🔑</span> Authentication</div>
+    <div class="input-group">
+      <label for="apiKey">API Key</label>
+      <input type="password" id="apiKey" placeholder="Paste your api.bible secret key…" />
+      <p class="input-hint">Get a free key at <a href="https://scripture.api.bible/" target="_blank">scripture.api.bible</a></p>
+    </div>
+  </div>
+
+  <!-- Endpoint Config -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📡</span> Endpoint</div>
+    <div class="input-group">
+      <label for="bibleId">Bible ID</label>
+      <input type="text" id="bibleId" value="65eec8e0b60e656b-01" />
+      <p class="input-hint">Default is the Free Bible API English version (FBV)</p>
+    </div>
+
+    <button class="btn btn-primary" id="fetchBtn" onclick="fetchBooks()">
+      <span id="btnText">Fetch Books</span>
+      <div class="spinner" id="btnSpinner" style="display:none;"></div>
+    </button>
+
+    <button class="toggle-code" onclick="toggleCode()" style="margin-left:1rem;">Show fetch code ↓</button>
+
+    <div class="code-block" id="codePreview">
+      <span class="kw">fetch</span>(<span class="str">`https://rest.api.bible/v1/bibles/<span class="kw">${bibleId}</span>/books?include-chapters=false&include-chapters-and-sections=false`</span>, {<br>
+      &nbsp;&nbsp;headers: {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">'api-key'</span>: <span class="str">'YOUR_SECRET_TOKEN'</span><br>
+      &nbsp;&nbsp;}<br>
+      })<br>
+      .<span class="kw">then</span>(res =&gt; res.<span class="kw">json</span>())<br>
+      .<span class="kw">then</span>(data =&gt; <span class="cmt">// handle data.data</span><br>
+      );
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar" id="status">
+    <span id="statusIcon"></span>
+    <span id="statusMsg"></span>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="card">
+      <div class="results-header">
+        <div class="card-title"><span class="icon">📖</span> Books</div>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+      <div class="book-grid" id="bookGrid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">{ }</span> Raw JSON Response</div>
+      <button class="btn btn-secondary" onclick="toggleRaw()">Toggle Raw Data</button>
+      <pre class="code-block" id="rawJson" style="max-height:400px; overflow-y:auto;"></pre>
+    </div>
+  </div>
+
+  <footer>Built with the API.Bible REST API &middot; JavaScript Fetch</footer>
+</div>
+
+<script>
+  function setStatus(type, msg) {
+    const bar = document.getElementById('status');
+    const icon = document.getElementById('statusIcon');
+    const msgEl = document.getElementById('statusMsg');
+    bar.className = 'status-bar visible ' + type;
+    icon.innerHTML = type === 'loading' ? '<div class="spinner"></div>' :
+                     type === 'error' ? '✕' : '✓';
+    msgEl.textContent = msg;
+  }
+
+  function hideStatus() {
+    document.getElementById('status').className = 'status-bar';
+  }
+
+  function toggleCode() {
+    document.getElementById('codePreview').classList.toggle('visible');
+  }
+
+  function toggleRaw() {
+    document.getElementById('rawJson').classList.toggle('visible');
+  }
+
+  async function fetchBooks() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const bibleId = document.getElementById('bibleId').value.trim();
+    const btn = document.getElementById('fetchBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('btnSpinner');
+
+    if (!apiKey) {
+      setStatus('error', 'Please enter your API key first.');
+      return;
+    }
+
+    if (!bibleId) {
+      setStatus('error', 'Please enter a Bible ID.');
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btnText.textContent = 'Fetching…';
+    spinner.style.display = 'block';
+    setStatus('loading', 'Calling api.bible…');
+    document.getElementById('results').classList.remove('visible');
+
+    try {
+      const url = `https://rest.api.bible/v1/bibles/${bibleId}/books?include-chapters=false&include-chapters-and-sections=false`;
+
+      const response = await fetch(url, {
+        headers: {
+          'api-key': apiKey
+        }
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errBody || response.statusText}`);
+      }
+
+      const json = await response.json();
+      const books = json.data;
+
+      if (!books || !books.length) {
+        setStatus('error', 'No books found in the response.');
+        return;
+      }
+
+      // Render books
+      const grid = document.getElementById('bookGrid');
+      grid.innerHTML = '';
+
+      books.forEach((book, i) => {
+        const el = document.createElement('div');
+        el.className = 'book-item';
+        el.style.animationDelay = `${i * 30}ms`;
+        el.innerHTML = `
+          <span class="book-num">${i + 1}</span>
+          <div class="book-info">
+            <div class="book-name">${book.name || book.id}</div>
+            <div class="book-abbrev">${book.abbreviation || ''} &middot; ${book.id}</div>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+
+      // Raw JSON
+      document.getElementById('rawJson').textContent = JSON.stringify(json, null, 2);
+      document.getElementById('resultsCount').textContent = `${books.length} books`;
+      document.getElementById('results').classList.add('visible');
+
+      setStatus('success', `Successfully fetched ${books.length} books from api.bible`);
+
+    } catch (err) {
+      setStatus('error', err.message);
+      console.error('Fetch error:', err);
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'Fetch Books';
+      spinner.style.display = 'none';
+    }
+  }
+
+  // Allow Enter key to trigger fetch
+  document.getElementById('apiKey').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchBooks();
+  });
+</script>
+
+</body>
+</html>
